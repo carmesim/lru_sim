@@ -30,6 +30,37 @@ void sanity_check_get_bit_at() {
     fprintf(stderr, "[self-test] OK\n");
 }
 
+void sanity_check_set_bit() {
+    fprintf(stderr, "[self-test] Sanity checking set_bit\n");
+    // 5 is 0b00000101
+    uint8_t val = 5;
+    assert(int_to_binary(val) == 101);
+
+    set_bit(&val, 3, true);
+    // val is now 0b00001101 = 13
+    assert(int_to_binary(val) == 1101);
+
+    set_bit(&val, 4, true);
+    // val is now 0b00011101 = 29
+    assert(int_to_binary(val) == 11101);
+
+    set_bit(&val, 4, false);
+    // val is now 0b00001101 = 13
+    assert(int_to_binary(val) == 1101);
+
+    set_bit(&val, 3, false);
+    // val is now 0b00000101 = 5
+    assert(int_to_binary(val) == 101);
+
+    set_bit(&val, 2, false);
+    // val is now 0b00000001 = 1
+    assert(int_to_binary(val) == 1);
+
+
+
+    fprintf(stderr, "[self-test] OK\n");
+}
+
 void sanity_check_count_zeroes() {
     fprintf(stderr, "[self-test] Sanity checking count_zeroes\n");
     // 65 is 0b10000010
@@ -64,6 +95,7 @@ int main()
     printf("Tests\n");
     sanity_check_get_bit_at();
     sanity_check_count_zeroes();
+    sanity_check_set_bit();
     printf("\nProgram\n");
     srand(time(NULL));
 

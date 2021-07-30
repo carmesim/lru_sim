@@ -7,6 +7,20 @@ bool get_bit_at(uint8_t byte, uint8_t idx) {
     return ((byte >> (idx))  & 0x01);
 }
 
+//! Set a bit on or off.
+//! The bit in the position `idx` will be set on if `set_on` is true
+//! or set off if `set_on` is false
+void set_bit(uint8_t * byte, const uint8_t idx, const bool set_on) {
+    if(set_on && !get_bit_at(*byte, idx)) {
+        // Set a bit on
+        *byte |= 0x01 << idx;
+        return;
+    }
+
+    // Set a bit off
+    *byte &= ~(0x01 << idx);
+}
+
 //! Will count how many bits are unset in `byte`
 uint8_t count_zeroes(uint8_t byte) {
     uint8_t count = 0;
