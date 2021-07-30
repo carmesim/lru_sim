@@ -1,0 +1,7 @@
+lru
+*.o
+Makefile
+*.pro.user
+lru
+lru_sim
+.qmake.stash
