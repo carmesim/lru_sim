@@ -1,8 +1,12 @@
 #include <unistd.h> // For sysconf, _SC_PAGE_SIZE
 #include <stdio.h>
+#include <stdlib.h> // For srand
+#include <unistd.h> // For sleep
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <time.h> // For time
+#include "definitions.h"
 
 long page_size_in_bytes() {
     return sysconf(_SC_PAGE_SIZE);
@@ -80,7 +84,25 @@ void sanity_check_count_zeroes() {
 
 int main()
 {
+    printf("Tests\n");
     sanity_check_get_bit_at();
     sanity_check_count_zeroes();
+    printf("\nProgram\n");
+    srand(time(NULL));
+
+    int n_pages = 0;
+    while(n_pages < 5){
+        //page_t *new_page;
+        //new_page = malloc(sizeof(page_t));
+        //new_page->R = rand()%2;
+        int v_addr = rand()%N_SLOTS_VM;
+        printf("Referencing page in virtual addr %d...\n", v_addr);
+
+
+        n_pages++;
+        sleep(2);
+    }
+    // mem_free_pages(); // free all memory pages
+
     return 0;
 }
