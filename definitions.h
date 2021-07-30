@@ -9,9 +9,11 @@
 
 typedef struct{
     uint8_t referenced_counter;
+    // true when the memory page is unused
+    bool is_free;
 }page_t;
 
-typedef struct{
+typedef struct {
     page_t page;
 }mem_slot_t;
 
