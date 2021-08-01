@@ -100,19 +100,21 @@ int main()
     srand(time(NULL));
 
     int n_pages = 0;
-    while(n_pages < 5){
+    init_pages_as_free();
+    while(n_pages < 100){
         //page_t *new_page;
         //new_page = malloc(sizeof(page_t));
         //new_page->R = rand()%2;
         int v_addr = rand()%N_SLOTS_VM;
-        int rv = reference_page(v_addr);
+
         printf("Referencing page in virtual addr %d...\n", v_addr);
+        int rv = reference_page(v_addr);
         if(rv == -1){
             printf("Invalid virtual address\n");
             return 1;
         }
         n_pages++;
-        sleep(2);
+        sleep(1);
     }
     // mem_free_pages(); // free all memory pages
 
