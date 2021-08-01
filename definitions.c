@@ -15,19 +15,22 @@ int reference_page(uint8_t addr) {
     // lookup page table entry of given address
     page_table_entry_t pte = page_table[addr];
 
-    if(pte.is_mapped){
+    if(pte.is_mapped == true){
         // reference page
         // assuming it's on the real memory
-        real_memory[pte.real_addr].page.referenced_counter++;
-        //[TODO] update the referenced bit
+        real_memory[pte.real_addr].page.referenced_counter++; // update counter;
+        real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
     }else{
         // page fault
-        uint8_t real_addr = get_free_real_address();
+        uint8_t real_addr = get_free_real_address();// -1 se não achar
         if(real_addr == -1){//real memory is full
             // page miss
             
-            // generate addr form N_SLOTS_RM to N_SLOTS_VM
-            uint8_t swap_addr = rand()%N_SLOTS_VM + N_SLOTS_RM;
+            // get a new swap address to recieve the oldest page
+            uint8_t swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
+            if(swap_addr == -1){
+                // :(
+            }
 
             // find lru page and puts it into swap
             uint8_t liberated_adrr; //liberated address
@@ -35,11 +38,14 @@ int reference_page(uint8_t addr) {
 
             // the freed address will recieve the new page
             real_memory[liberated_adrr].page.referenced_counter = 1;
+            real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
 
-            pte.real_addr = lib_addr; // store it in the page table
+            pte.real_addr = liberated_adrr; // store it in the page table
             pte.is_mapped = true;  
         }else{
-            real_memory[pte.real_addr].page.referenced_counter++;
+            pte.real_addr = real_addr;
+            real_memory[pte.real_addr].page.referenced_counter++; // update counter
+            real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
         }
     }
     return 0;
