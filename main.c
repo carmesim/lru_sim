@@ -105,8 +105,8 @@ int main()
         //new_page = malloc(sizeof(page_t));
         //new_page->R = rand()%2;
         int v_addr = rand()%N_SLOTS_VM;
-        printf("Referencing page in virtual addr %d...\n", v_addr);
         int rv = reference_page(v_addr);
+        printf("Referencing page in virtual addr %d...\n", v_addr);
         if(rv == -1){
             printf("Invalid virtual address\n");
             return 1;

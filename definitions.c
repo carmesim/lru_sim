@@ -7,9 +7,18 @@ mem_slot_t swap[N_SLOTS_SWAP];
 // process table stores the mapping between VM and RM
 page_table_entry_t page_table[N_SLOTS_VM];
 
-static int8_t get_free_real_address() {
-    for(int8_t i = 0; i < N_SLOTS_RM; i++) {
+static uint8_t get_free_real_address() {
+    for(uint8_t i = 0; i < N_SLOTS_RM; i++) {
         if(real_memory[i].page.is_free) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static uint8_t get_free_swap_address() {
+    for(uint8_t i = 0; i < N_SLOTS_RM; i++) {
+        if(swap[i].page.is_free) {
             return i;
         }
     }
@@ -63,6 +72,24 @@ int reference_page(uint8_t addr) {
 }
 
 
+// returns the last recently used page 
+// and changes lib_addr to the freed address
+// on the real memory
 page_t lru_page(uint8_t *lib_addr){
-    // [TODO]
+    int i, pi_counter = 0, lowest, i_lru = 0;
+    page_t lru;
+    for (i = 0; i < N_SLOTS_RM; i++){
+        pi_counter = real_memory[i].page.referenced_counter;
+        if(i == 0){
+            lowest = pi_counter;
+        }else{
+            if(pi_counter < lowest){
+                lowest = pi_counter;
+                i_lru = i;
+            }
+        }
+    }
+    *lib_addr = i_lru;
+    lru = real_memory[i_lru].page;
+    return lru;
 }
