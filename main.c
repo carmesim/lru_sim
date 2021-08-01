@@ -106,8 +106,11 @@ int main()
         //new_page->R = rand()%2;
         int v_addr = rand()%N_SLOTS_VM;
         printf("Referencing page in virtual addr %d...\n", v_addr);
-
-
+        int rv = reference_page(v_addr);
+        if(rv == -1){
+            printf("Invalid virtual address\n");
+            return 1;
+        }
         n_pages++;
         sleep(2);
     }

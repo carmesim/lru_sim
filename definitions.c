@@ -25,49 +25,38 @@ int reference_page(uint8_t addr) {
     // lookup page table entry of given address
     page_table_entry_t pte = page_table[addr];
 
-    if(pte.is_mapped){
+    if(pte.is_mapped == true){
         // reference page
-
         // assuming it's on the real memory
-        real_memory[pte.real_addr].page.referenced_counter++;
-
+        real_memory[pte.real_addr].page.referenced_counter++; // update counter;
+        real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
     }else{
         // page fault
-        int8_t real_addr = get_free_real_address();
+        uint8_t real_addr = get_free_real_address();// -1 se não achar
+
         if(real_addr == -1){//real memory is full
             // page miss
             
-            // generate addr form N_SLOTS_RM to N_SLOTS_VM
-            uint8_t swap_addr = rand()%N_SLOTS_VM + N_SLOTS_RM;
+            // get a new swap address to recieve the oldest page
+            uint8_t swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
+            if(swap_addr == -1){
+                // :(
+            }
 
             // find lru page and puts it into swap
-            uint8_t lib_adrr;
-            swap[swap_addr].page = lru_page(&lib_adrr);
+            uint8_t liberated_adrr; //liberated address
+            swap[swap_addr].page = lru_page(&liberated_adrr);
 
             // the freed address will recieve the new page
-            real_memory[lib_adrr].page.referenced_counter++;
-            page_t new_page = malloc(sizeof(page_t));
-            new_page.referenced_counter = 1;
-            real_memory[lib_adrr].page = new_page;
+            real_memory[liberated_adrr].page.referenced_counter = 1;
+            real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
 
-            pte.real_addr = lib_addr;
+            pte.real_addr = liberated_adrr; // store it in the page table
+            pte.is_mapped = true;  
         }else{
-
-        }
-
-        if(addr >= N_SLOTS_RM){ 
-            // page miss
-            uint8_t lib_adrr;
-            swap[pte.real_addr].page = lru_page(&lib_adrr);
-            real_memory[lib_adrr].page.referenced_counter++;
-            page_t new_page = malloc(sizeof(page_t));
-            new_page.referenced_counter = 1;
-            real_memory[lib_adrr].page = new_page;
-        }else{
-            uint8_t real_addr = rand()%N_SLOTS_RM;
-            page_t new_page = malloc(sizeof(page_t));
-            new_page.referenced_counter = 1;
-            real_memory[real_addr].page = new_page;
+            pte.real_addr = real_addr;
+            real_memory[pte.real_addr].page.referenced_counter++; // update counter
+            real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
         }
     }
     return 0;
