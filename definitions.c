@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "definitions.h"
 
 mem_slot_t real_memory[N_SLOTS_RM];
@@ -5,6 +6,15 @@ mem_slot_t swap[N_SLOTS_SWAP];
 
 // process table stores the mapping between VM and RM
 page_table_entry_t page_table[N_SLOTS_VM];
+
+static int8_t get_free_real_address() {
+    for(int8_t i = 0; i < N_SLOTS_RM; i++) {
+        if(real_memory[i].page.is_free) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 int reference_page(uint8_t addr) {
     if(addr >= N_SLOTS_VM) {
@@ -23,6 +33,7 @@ int reference_page(uint8_t addr) {
     }else{
         // page fault
         uint8_t real_addr = get_free_real_address();// -1 se não achar
+
         if(real_addr == -1){//real memory is full
             // page miss
             
