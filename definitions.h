@@ -36,5 +36,6 @@ int reference_page(int8_t addr);
 // on the real memory
 page_t lru_page(int8_t *lib_addr);
 void init_pages_as_free();
+void unreference_all_pages();
 
 #endif // DEFINITIONS_H

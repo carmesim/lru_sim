@@ -102,12 +102,11 @@ int main()
     int n_pages = 0;
     init_pages_as_free();
     while(n_pages < 100){
-        //page_t *new_page;
-        //new_page = malloc(sizeof(page_t));
-        //new_page->R = rand()%2;
+        unreference_all_pages();
+
         int v_addr = rand()%N_SLOTS_VM;
 
-        printf("Referencing page in virtual addr %d...\n", v_addr);
+        printf("\nReferencing page in virtual addr %d...\n", v_addr);
         int rv = reference_page(v_addr);
         if(rv == -1){
             printf("Invalid virtual address\n");
