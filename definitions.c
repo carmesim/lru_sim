@@ -3,10 +3,36 @@
 #include "definitions.h"
 
 mem_slot_t real_memory[N_SLOTS_RM];
-mem_slot_t swap[N_SLOTS_SWAP];
+sw_mem_slot_t swap[N_SLOTS_SWAP];
 
 // process table stores the mapping between VM and RM
 page_table_entry_t page_table[N_SLOTS_VM];
+
+char* converte_n_bin(int x, int n){
+    // 30 é maior do que qualquer campo
+    char str[30] = {'\0'};
+    char* inv = calloc(30, sizeof(char));
+    int tam = 0;
+    while(x >= 2){
+        if(x%2 == 0)
+            str[tam++] = '0';
+        else
+            str[tam++] = '1';
+        x /= 2;
+    }
+    if(x == 0)
+        str[tam] = '0';
+    else
+        str[tam] = '1';
+    int i, extra = n - tam - 1;
+    for(i = 0; i < extra; i ++){
+        inv[i] = '0';
+    }
+    for(i = 0; i <= tam; i ++){
+        inv[extra + i] = str[tam - i];
+    }
+    return inv;
+}
 
 static int8_t get_free_real_address() {
     for(int8_t i = 0; i < N_SLOTS_RM; i++) {
@@ -54,6 +80,23 @@ void unmap_address(int8_t real_addr){
     }
 }
 
+// returns the address on swap of an old real memory address
+int8_t get_swap_address(int8_t end_real){
+    int i;
+    for (i = 0; i < N_SLOTS_SWAP; i++){
+        if(swap[i].old_addr == end_real){
+            return i;
+        }
+    }
+    return -1;
+}
+
+// remove a page from swap and returns it
+page_t remove_from_swap(int8_t swap_addr){
+    swap[swap_addr].page.is_free = 0;
+    return swap[swap_addr].page;
+}
+
 int reference_page(int8_t addr) {
     if(addr >= N_SLOTS_VM) {
         // invalid virtual address
@@ -66,7 +109,7 @@ int reference_page(int8_t addr) {
     if(pte.is_mapped){
         // reference page
         // assuming it's on the real memory
-        printf("Page in real address %d was referenced\n", pte.real_addr);
+        //printf("Page in real address %d was referenced\n", pte.real_addr);
 
         // update counter
         if(real_memory[pte.real_addr].page.R == 1){
@@ -78,21 +121,22 @@ int reference_page(int8_t addr) {
         real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
 
     }else{
-        /*if(is_on_swap(pte.real_addr)){
-            
-        }*/
         // page miss
         printf("Page Miss !\n");
         int8_t real_addr = get_free_real_address();// -1 se não achar
 
         if(real_addr == -1){//real memory is full
 
-            
-            // get a new swap address to recieve the oldest page
-            int8_t swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
-            if(swap_addr == -1){
-                // :(
-                return -1;
+            int8_t swap_addr = get_swap_address(pte.real_addr);
+            page_t swap_page;
+            bool from_swap = 0;
+
+            if(swap_addr != -1){ // está na swap
+                swap_page = remove_from_swap(swap_addr);
+                from_swap = 1;
+            }else{
+                // get a new swap address to recieve the oldest page
+                swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
             }
 
             // find lru page and puts it into swap
@@ -105,8 +149,14 @@ int reference_page(int8_t addr) {
             unmap_address(liberated_adrr);
 
             // the freed address will recieve the new page
-            real_memory[liberated_adrr].page.referenced_counter = 1;
+            real_memory[liberated_adrr].page.referenced_counter = 128;
             real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
+
+            if(from_swap == 1){
+                real_memory[liberated_adrr].page.content = swap_page.content;
+            }else{
+                real_memory[liberated_adrr].page.content = rand()%MAX_CONTENT_VAL;
+            }
 
             pte.real_addr = liberated_adrr; // store it in the page table
             pte.is_mapped = 1;  
@@ -115,7 +165,8 @@ int reference_page(int8_t addr) {
             pte.real_addr = real_addr;
             pte.is_mapped = 1;
 
-            real_memory[pte.real_addr].page.referenced_counter = 1;
+            real_memory[pte.real_addr].page.content = rand()%MAX_CONTENT_VAL;
+            real_memory[pte.real_addr].page.referenced_counter = 128;
             real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
             real_memory[pte.real_addr].page.is_free = false; // set the page as linked to a virtual address
 

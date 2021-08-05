@@ -112,7 +112,21 @@ int main()
             printf("Invalid virtual address\n");
             return 1;
         }
+
+        int i;
+
+        // Visualization of the memoy contents
+        for(i = 0; i < N_SLOTS_VM; i++){
+            if(i < N_SLOTS_RM){
+                printf("VM[%d] = (end=%d, ismapped=%d)", i, page_table[i].real_addr, page_table[i].is_mapped);
+                printf(" | RM[%d] = (content=%d, counter=%d) | SW[%d] = %d\n", i, real_memory[i].page.content, real_memory[i].page.referenced_counter, i, swap[i].page.content );
+            }else{
+                printf("VM[%d] = (end=%d, ismapped=%d)\n", i, page_table[i].real_addr, page_table[i].is_mapped);
+            }
+        }
+
         n_pages++;
+        printf("\n\n");
         sleep(1);
     }
     // mem_free_pages(); // free all memory pages
