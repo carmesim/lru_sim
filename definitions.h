@@ -10,8 +10,8 @@
 #define MAX_CONTENT_VAL 1000
 
 typedef struct{
-    int8_t referenced_counter;
-    bool R;// referenced bit
+    uint8_t referenced_counter;
+    int R;// referenced bit
     bool is_free;// true when the memory page is unused
     int content;
 }page_t;
@@ -48,5 +48,9 @@ void init_pages_as_free();
 void unreference_all_pages();
 int8_t get_swap_address(int8_t end_real);
 page_t remove_from_swap(int8_t swap_addr);
+void update_counters();
+
+//impostor --- must be removed
 char* converte_n_bin(int x, int n);
+
 #endif // DEFINITIONS_H

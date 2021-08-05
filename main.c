@@ -119,11 +119,13 @@ int main()
         for(i = 0; i < N_SLOTS_VM; i++){
             if(i < N_SLOTS_RM){
                 printf("VM[%d] = (end=%d, ismapped=%d)", i, page_table[i].real_addr, page_table[i].is_mapped);
-                printf(" | RM[%d] = (content=%d, counter=%d) | SW[%d] = %d\n", i, real_memory[i].page.content, real_memory[i].page.referenced_counter, i, swap[i].page.content );
+                printf(" | RM[%d] = (counter=%s, content=%d) | SW[%d] = %d\n", i,converte_n_bin(real_memory[i].page.referenced_counter, 8),  real_memory[i].page.content, i, swap[i].page.content );
             }else{
                 printf("VM[%d] = (end=%d, ismapped=%d)\n", i, page_table[i].real_addr, page_table[i].is_mapped);
             }
         }
+
+        update_counters();
 
         n_pages++;
         printf("\n\n");

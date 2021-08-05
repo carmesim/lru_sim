@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "definitions.h"
+#include "binutils.h"
 
 mem_slot_t real_memory[N_SLOTS_RM];
 sw_mem_slot_t swap[N_SLOTS_SWAP];
@@ -97,6 +98,30 @@ page_t remove_from_swap(int8_t swap_addr){
     return swap[swap_addr].page;
 }
 
+// update counters based on the referenced bit (R)
+void update_counters(){
+    int i;
+    for (i = 0; i < N_SLOTS_RM; i++){
+        // update counter
+        printf("RM[%d].page.R = %d\n", i, real_memory[i].page.R);
+        if(real_memory[i].page.R == 1){
+            if(real_memory[i].page.referenced_counter != 0){
+                real_memory[i].page.referenced_counter /=2 ; // update counter;
+            }else{
+                real_memory[i].page.referenced_counter = 0 ; // update counter;
+            }
+            real_memory[i].page.referenced_counter += 128; // update counter;
+        }else{
+            if(real_memory[i].page.referenced_counter != 0){
+                real_memory[i].page.referenced_counter /=2 ; // update counter;
+            }else{
+                real_memory[i].page.referenced_counter = 0 ; // update counter;
+            }
+        }
+    }
+}
+
+
 int reference_page(int8_t addr) {
     if(addr >= N_SLOTS_VM) {
         // invalid virtual address
@@ -111,13 +136,6 @@ int reference_page(int8_t addr) {
         // assuming it's on the real memory
         //printf("Page in real address %d was referenced\n", pte.real_addr);
 
-        // update counter
-        if(real_memory[pte.real_addr].page.R == 1){
-            real_memory[pte.real_addr].page.referenced_counter /= 2; // update counter;
-            real_memory[pte.real_addr].page.referenced_counter += 128; // update counter;
-        }else{
-            real_memory[pte.real_addr].page.referenced_counter /=2 ; // update counter;
-        }
         real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
 
     }else{
@@ -149,7 +167,6 @@ int reference_page(int8_t addr) {
             unmap_address(liberated_adrr);
 
             // the freed address will recieve the new page
-            real_memory[liberated_adrr].page.referenced_counter = 128;
             real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
 
             if(from_swap == 1){
@@ -166,7 +183,6 @@ int reference_page(int8_t addr) {
             pte.is_mapped = 1;
 
             real_memory[pte.real_addr].page.content = rand()%MAX_CONTENT_VAL;
-            real_memory[pte.real_addr].page.referenced_counter = 128;
             real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
             real_memory[pte.real_addr].page.is_free = false; // set the page as linked to a virtual address
 
@@ -182,15 +198,16 @@ int reference_page(int8_t addr) {
 // and changes lib_addr to the freed address
 // on the real memory
 page_t lru_page(int8_t *lib_addr){
-    int i, pi_counter = 0, lowest, i_lru = 0;
+    int i, pi_counter = 0, n_zeros_page = 0, i_lru = 0, greatest;
     page_t lru;
     for (i = 0; i < N_SLOTS_RM; i++){
         pi_counter = real_memory[i].page.referenced_counter;
+        n_zeros_page = count_zeroes(pi_counter);
         if(i == 0){
-            lowest = pi_counter;
+            greatest = n_zeros_page;
         }else{
-            if(pi_counter < lowest){
-                lowest = pi_counter;
+            if(n_zeros_page > greatest){
+                greatest = n_zeros_page;
                 i_lru = i;
             }
         }
