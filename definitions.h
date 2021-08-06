@@ -11,6 +11,12 @@
 #define N_SLOTS_VM 16
 #define N_SLOTS_SWAP 16 // |SW| >= |VM| - |RM|
 
+// Cool branchless max for signed integers
+#ifndef max
+#   define max(a, b) (a - ((a-b) & (a-b)>>31))
+#   define OUR_MAX
+#endif
+
 #define MAX_CONTENT_VAL 1000
 
 typedef struct{

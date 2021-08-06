@@ -1,11 +1,12 @@
 #include <unistd.h> // For sysconf, _SC_PAGE_SIZE
 #include <stdio.h>
+#include <sys/param.h> // For MAX
 #include <stdlib.h>   // For srand
 #include <unistd.h>   // For sleep
 #include <stdint.h>   // For uint8_t, uint32_t
-#include <stdbool.h>
-#include <assert.h>  // For assert
-#include <time.h>    // For time
+#include <stdbool.h>  // For bool
+#include <assert.h>   // For assert
+#include <time.h>     // For time
 
 #include "definitions.h"
 #include "binutils.h"
@@ -42,6 +43,19 @@ void sanity_check_get_bit_at() {
     }
     fprintf(stderr, "[self-test] OK\n");
 }
+
+#ifdef OUR_MAX
+void sanity_check_max() {
+    fprintf(stderr, "[self-test] Sanity checking max\n");
+    assert(max(2, 3) == 3);
+    assert(max(5, 1) == 5);
+    assert(max(9, 0) == 9);
+    assert(max(0, 255) == 255);
+    assert(max(255, 256) == 256);
+    assert(max(2147483647, 4294967295) == 4294967295);
+    fprintf(stderr, "[self-test] OK\n");
+}
+#endif
 
 void sanity_check_set_bit() {
     fprintf(stderr, "[self-test] Sanity checking set_bit\n");
@@ -106,6 +120,9 @@ void sanity_check_count_zeroes() {
 int main(int argc, char** argv){
 
     printf("Tests\n");
+#ifdef OUR_MAX
+    sanity_check_max();
+#endif
     sanity_check_get_bit_at();
     sanity_check_count_zeroes();
     sanity_check_set_bit();
@@ -144,10 +161,7 @@ int main(int argc, char** argv){
         }
         update_counters();
 
-
-
-        // literally max(N_SLOTS_VM, N_SLOTS_SWAP)
-        int max_swap_vm = N_SLOTS_VM;
+        int max_swap_vm = MAX(N_SLOTS_VM, N_SLOTS_SWAP);
         if(N_SLOTS_VM < N_SLOTS_SWAP ){
             max_swap_vm = N_SLOTS_SWAP;
         }
