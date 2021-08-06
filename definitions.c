@@ -92,9 +92,13 @@ page_t remove_from_swap(int8_t swap_addr){
 void update_counters(){
     printf("\n");
     int i;
-    for (i = 0; i < N_SLOTS_RM; i++){
+
+    for (i = 0; i < N_SLOTS_RM/2; i++){
         // update counter
-        printf("RM[%d].page.R = %d\n", i, real_memory[i].page.R);
+        printf("RM[%d].page.R = %d | ", i, real_memory[i].page.R);
+
+        printf("RM[%d].page.R = %d\n", i+N_SLOTS_RM/2, real_memory[i+N_SLOTS_RM/2].page.R);
+
         if(real_memory[i].page.R == 1){
             if(real_memory[i].page.referenced_counter != 0){
                 real_memory[i].page.referenced_counter /=2 ; // update counter;
