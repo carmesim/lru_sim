@@ -10,32 +10,6 @@ sw_mem_slot_t swap[N_SLOTS_SWAP];
 // process table stores the mapping between VM and RM
 page_table_entry_t page_table[N_SLOTS_VM];
 
-char* converte_n_bin(int x, int n){
-    // 30 é maior do que qualquer campo
-    char str[30] = {'\0'};
-    char* inv = calloc(30, sizeof(char));
-    int tam = 0;
-    while(x >= 2){
-        if(x%2 == 0)
-            str[tam++] = '0';
-        else
-            str[tam++] = '1';
-        x /= 2;
-    }
-    if(x == 0)
-        str[tam] = '0';
-    else
-        str[tam] = '1';
-    int i, extra = n - tam - 1;
-    for(i = 0; i < extra; i ++){
-        inv[i] = '0';
-    }
-    for(i = 0; i <= tam; i ++){
-        inv[extra + i] = str[tam - i];
-    }
-    return inv;
-}
-
 static int8_t get_free_real_address() {
     for(int8_t i = 0; i < N_SLOTS_RM; i++) {
         if(real_memory[i].page.is_free) {
