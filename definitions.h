@@ -54,7 +54,4 @@ int8_t get_swap_address(int8_t v_addr, int8_t r_addr);
 page_t remove_from_swap(int8_t swap_addr);
 void update_counters();
 
-//impostor --- must be removed
-char* converte_n_bin(int x, int n);
-
 #endif // DEFINITIONS_H

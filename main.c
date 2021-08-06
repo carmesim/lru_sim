@@ -165,7 +165,7 @@ int main(int argc, char** argv){
                 }
 
                 if(i < N_SLOTS_RM){
-                    printf(" | RM[%02d] = (counter=%s, content=%03d)", i,converte_n_bin(real_memory[i].page.referenced_counter, 8),  real_memory[i].page.content);
+                    printf(" | RM[%02d] = (counter=%08d, content=%03d)", i, int_to_binary(real_memory[i].page.referenced_counter),  real_memory[i].page.content);
                     if(i < N_SLOTS_SWAP){
                         printf(" | SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_rm_addr,swap[i].page.is_free );
                     }
