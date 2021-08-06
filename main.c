@@ -116,6 +116,10 @@ int main(int argc, char** argv){
 
     if(argc == 2){
         max_n_pages = atoi(argv[1]);// max number of pages genereted at each cycle
+        if(max_n_pages > N_SLOTS_VM){
+            printf("[ERROR] Max number of pages spawn per cycle must be lower than %d !\n", N_SLOTS_VM);
+            return 1;
+        }
     }
 
     init_pages_as_free();
