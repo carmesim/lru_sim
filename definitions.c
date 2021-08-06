@@ -70,15 +70,19 @@ void unmap_address(int8_t real_addr){
 // returns the address on swap of an old real memory address
 int8_t get_swap_address(int8_t v_addr, int8_t r_addr){
     int i;
-    printf("Searching on swap...\n");
+    printf("Searching on swap... ");
     for (i = 0; i < N_SLOTS_SWAP; i++){
         if(swap[i].old_vm_addr == v_addr && swap[i].old_rm_addr == r_addr && swap[i].page.is_free == 0){
-            printf("FOUND IT!\n");
+            GREEN()
+            printf("found!\n");
+            BLACK()
             return i;
         }else{
         }
     }
-    printf("Didn't found it.\n");
+    RED()
+    printf("not found!\n");
+    BLACK()
     return -1;
 }
 
