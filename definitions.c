@@ -58,8 +58,8 @@ static int8_t get_free_swap_address() {
 // set all pages as free
 void init_pages_as_free() {
     for(int8_t i = 0; i < N_SLOTS_RM; i++) {
-        real_memory[i].page.is_free = true;
-        swap[i].page.is_free = true;
+        real_memory[i].page.is_free = 1;
+        swap[i].page.is_free = 1;
     }
 }
 
@@ -85,7 +85,7 @@ void unmap_address(int8_t real_addr){
 int8_t get_swap_address(int8_t end_real){
     int i;
     for (i = 0; i < N_SLOTS_SWAP; i++){
-        if(swap[i].old_addr == end_real){
+        if(swap[i].old_addr == end_real && swap[i].page.is_free == 0){
             return i;
         }
     }
@@ -94,12 +94,13 @@ int8_t get_swap_address(int8_t end_real){
 
 // remove a page from swap and returns it
 page_t remove_from_swap(int8_t swap_addr){
-    swap[swap_addr].page.is_free = 0;
+    swap[swap_addr].page.is_free = 1; // set position as free
     return swap[swap_addr].page;
 }
 
 // update counters based on the referenced bit (R)
 void update_counters(){
+    printf("\n");
     int i;
     for (i = 0; i < N_SLOTS_RM; i++){
         // update counter
@@ -119,8 +120,8 @@ void update_counters(){
             }
         }
     }
+    printf("\n");
 }
-
 
 int reference_page(int8_t addr) {
     if(addr >= N_SLOTS_VM) {
@@ -150,9 +151,11 @@ int reference_page(int8_t addr) {
             bool from_swap = 0;
 
             if(swap_addr != -1){ // está na swap
+                printf("Given address wasn't on swap !\n");
                 swap_page = remove_from_swap(swap_addr);
                 from_swap = 1;
             }else{
+                printf("Given address was on swap !\n");
                 // get a new swap address to recieve the oldest page
                 swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
             }
@@ -160,6 +163,8 @@ int reference_page(int8_t addr) {
             // find lru page and puts it into swap
             int8_t liberated_adrr; //liberated address
             swap[swap_addr].page = lru_page(&liberated_adrr);
+            swap[swap_addr].page.is_free = 0;// sets the swap slot as busy
+
             printf("Page mapped to %d\n", liberated_adrr);
             printf("obs:The removed page went to swap[%d]\n", swap_addr);
 
@@ -167,6 +172,7 @@ int reference_page(int8_t addr) {
             unmap_address(liberated_adrr);
 
             // the freed address will recieve the new page
+            real_memory[liberated_adrr].page.referenced_counter = 0 ; // update counter to 0;
             real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
 
             if(from_swap == 1){

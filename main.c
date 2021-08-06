@@ -97,39 +97,44 @@ int main()
     sanity_check_count_zeroes();
     sanity_check_set_bit();
     printf("\nProgram\n");
-    srand(time(NULL));
+    srand(4);
 
-    int n_pages = 0;
+    int i, n_pages = 0;
     init_pages_as_free();
     while(n_pages < 100){
+
+        printf("\n\n=======================(Ciclo %d)==========================\n", n_pages);
         unreference_all_pages();
 
-        int v_addr = rand()%N_SLOTS_VM;
-
-        printf("\nReferencing page in virtual addr %d...\n", v_addr);
-        int rv = reference_page(v_addr);
-        if(rv == -1){
-            printf("Invalid virtual address\n");
-            return 1;
+        for (i = 0; i < 2; i++){
+            int v_addr = rand()%N_SLOTS_VM;
+            printf("\nReferencing page in virtual addr %d...\n", v_addr);
+            int rv = reference_page(v_addr);
+            if(rv == -1){
+                printf("Invalid virtual address\n");
+                return 1;
+            }
         }
+        update_counters();
 
-        int i;
+
 
         // Visualization of the memoy contents
         for(i = 0; i < N_SLOTS_VM; i++){
             if(i < N_SLOTS_RM){
                 printf("VM[%d] = (end=%d, ismapped=%d)", i, page_table[i].real_addr, page_table[i].is_mapped);
-                printf(" | RM[%d] = (counter=%s, content=%d) | SW[%d] = %d\n", i,converte_n_bin(real_memory[i].page.referenced_counter, 8),  real_memory[i].page.content, i, swap[i].page.content );
+                printf(" | RM[%d] = (counter=%s, content=%d)", i,converte_n_bin(real_memory[i].page.referenced_counter, 8),  real_memory[i].page.content);
+                printf(" | SW[%d] = (content=%d, old_addr =%d, is_free=%d)\n", i, swap[i].page.content, swap[i].old_addr, swap[i].page.is_free );
             }else{
                 printf("VM[%d] = (end=%d, ismapped=%d)\n", i, page_table[i].real_addr, page_table[i].is_mapped);
             }
         }
 
-        update_counters();
 
+        int n;
+        scanf("%d", &n);
         n_pages++;
         printf("\n\n");
-        sleep(1);
     }
     // mem_free_pages(); // free all memory pages
 

@@ -3,9 +3,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define N_SLOTS_RM 8
-#define N_SLOTS_VM 16
-#define N_SLOTS_SWAP 8 // |SW| >= |VM| - |RM|
+#define N_SLOTS_RM 3
+#define N_SLOTS_VM 6
+#define N_SLOTS_SWAP 3 // |SW| >= |VM| - |RM|
 
 #define MAX_CONTENT_VAL 1000
 
