@@ -122,7 +122,7 @@ int deal_with_page_miss(int8_t addr, page_table_entry_t * pte) {
     printf(" missed!\n");
     BLACK()
 
-    int8_t real_addr = get_free_real_address();// -1 se não achar
+    int8_t real_addr = get_free_real_address();// -1 if didn't found
 
     if(real_addr == -1){//real memory is full
 
@@ -130,14 +130,14 @@ int deal_with_page_miss(int8_t addr, page_table_entry_t * pte) {
         page_t swap_page;
         bool from_swap = 0;
 
-        if(swap_addr != -1){ // está na swap
+        if(swap_addr != -1){ // is on swap
             printf("Given address was on swap !\n");
             swap_page = remove_from_swap(swap_addr);
             from_swap = 1;
         }else{
             printf("Given address wasn't on swap !\n");
             // get a new swap address to recieve the oldest page
-            swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
+            swap_addr = get_free_swap_address();
         }
 
         // find lru page and puts it into swap
@@ -194,7 +194,6 @@ int reference_page(int8_t addr) {
     if(pte.is_mapped){
         // reference page
         // assuming it's on the real memory
-        //printf("Page in real address %d was referenced\n", pte.real_addr);
 
         real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
         GREEN()
