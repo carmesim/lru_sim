@@ -154,13 +154,14 @@ int main(int argc, char** argv){
 
         // Visualization of the memoy contents
         for(i = 0; i < max_swap_vm; i++){
-            if(index_was_drawn(i)){
+            bool idx_was_drawn = index_was_drawn(i);
+            if(idx_was_drawn){
                 RED()
             }
             if(i < N_SLOTS_VM){
                 printf("VM[%02d] = (end=%d, ismapped=%d)", i, page_table[i].real_addr, page_table[i].is_mapped);
 
-                if(index_was_drawn(i)){
+                if(idx_was_drawn){
                     BLACK()
                 }
 
@@ -171,10 +172,9 @@ int main(int argc, char** argv){
                     }
                 }else{
                     if(i < N_SLOTS_SWAP){
-                        printf("%44s| SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", "", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_rm_addr,swap[i].page.is_free );
-                    }else{
-                        printf("\n");
+                        printf("%44s| SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)", "", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_rm_addr,swap[i].page.is_free );
                     }
+                    printf("\n");
                 }
             }else{
                 printf("%40s| SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", "", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_rm_addr,swap[i].page.is_free );
