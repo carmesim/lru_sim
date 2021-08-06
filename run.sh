@@ -1,2 +1,2 @@
 #!/bin/bash
-gcc *.c -o lru && ./lru
+gcc *.c -o lru

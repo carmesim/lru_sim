@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include "binutils.h"
 
+
 mem_slot_t real_memory[N_SLOTS_RM];
 sw_mem_slot_t swap[N_SLOTS_SWAP];
 
@@ -184,6 +185,7 @@ int reference_page(int8_t addr) {
             swap[swap_addr].page = lru_page(&liberated_adrr);
             swap[swap_addr].page.is_free = 0;// sets the swap slot as busy
             // store information for possible recovery
+            printf("actual va = %d, actual vr = %d\n", addr, liberated_adrr);
             swap[swap_addr].old_rm_addr = liberated_adrr;
             swap[swap_addr].old_vm_addr = addr;
 

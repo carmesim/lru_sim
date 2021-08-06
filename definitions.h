@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define RED() printf("\033[1;31m");
+#define BLACK() printf("\033[0m");
+
 #define N_SLOTS_RM 8
 #define N_SLOTS_VM 16
 #define N_SLOTS_SWAP 16 // |SW| >= |VM| - |RM|
