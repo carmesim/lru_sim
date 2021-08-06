@@ -101,12 +101,12 @@ int main()
 
     int i, n_pages = 0;
     init_pages_as_free();
-    while(n_pages < 100){
+    while(1){
 
         printf("\n\n=======================(Ciclo %d)==========================\n", n_pages);
         unreference_all_pages();
 
-        for (i = 0; i < 2; i++){
+        for (i = 0; i < 5; i++){
             int v_addr = rand()%N_SLOTS_VM;
             printf("\nReferencing page in virtual addr %d...\n", v_addr);
             int rv = reference_page(v_addr);
@@ -119,24 +119,39 @@ int main()
 
 
 
-        // Visualization of the memoy contents
-        for(i = 0; i < N_SLOTS_VM; i++){
-            if(i < N_SLOTS_RM){
-                printf("VM[%d] = (end=%d, ismapped=%d)", i, page_table[i].real_addr, page_table[i].is_mapped);
-                printf(" | RM[%d] = (counter=%s, content=%d)", i,converte_n_bin(real_memory[i].page.referenced_counter, 8),  real_memory[i].page.content);
-                printf(" | SW[%d] = (content=%d, old_addr =%d, is_free=%d)\n", i, swap[i].page.content, swap[i].old_addr, swap[i].page.is_free );
-            }else{
-                printf("VM[%d] = (end=%d, ismapped=%d)\n", i, page_table[i].real_addr, page_table[i].is_mapped);
-            }
+        // literally max(N_SLOTS_VM, N_SLOTS_SWAP)
+        int max_swap_vm = N_SLOTS_VM;
+        if(N_SLOTS_VM < N_SLOTS_SWAP ){
+            max_swap_vm = N_SLOTS_SWAP;
         }
 
+        // Visualization of the memoy contents
+        for(i = 0; i < max_swap_vm; i++){
+            if(i < N_SLOTS_VM){
+                printf("VM[%02d] = (end=%d, ismapped=%d)", i, page_table[i].real_addr, page_table[i].is_mapped);
+                if(i < N_SLOTS_RM){
+                    printf(" | RM[%02d] = (counter=%s, content=%03d)", i,converte_n_bin(real_memory[i].page.referenced_counter, 8),  real_memory[i].page.content);
+                    if(i < N_SLOTS_SWAP){
+                        printf(" | SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
+                    }
+                }else{
+                    if(i < N_SLOTS_SWAP){
+                        printf("\t\t\t\t\t        | SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
+                    }else{
+                        printf("\n");
+                    }
+                }
+            }else{
+                printf("\t\t\t\t\t\t\t\t        | SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
 
-        int n;
-        scanf("%d", &n);
+            }
+        }
+        
+        getchar();
+
         n_pages++;
         printf("\n\n");
+        // mem_free_pages(); // free all memory pages
     }
-    // mem_free_pages(); // free all memory pages
-
     return 0;
 }

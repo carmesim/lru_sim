@@ -47,18 +47,28 @@ static int8_t get_free_real_address() {
 }
 
 static int8_t get_free_swap_address() {
-    for(int8_t i = 0; i < N_SLOTS_RM; i++) {
+    for(int8_t i = 0; i < N_SLOTS_SWAP; i++) {
         if(swap[i].page.is_free) {
             return i;
         }
     }
+    printf("[Warning] Swap is full\n");
     return -1;
 }
 
 // set all pages as free
 void init_pages_as_free() {
-    for(int8_t i = 0; i < N_SLOTS_RM; i++) {
-        real_memory[i].page.is_free = 1;
+
+    // literally max(N_SLOTS_RM, N_SLOTS_SWAP)
+    int8_t max_rm_sw = N_SLOTS_RM;
+    if(max_rm_sw < N_SLOTS_SWAP){
+        max_rm_sw = N_SLOTS_SWAP;
+    }
+
+    for(int8_t i = 0; i < max_rm_sw; i++) {
+        if(i < N_SLOTS_RM){
+            real_memory[i].page.is_free = 1;
+        }
         swap[i].page.is_free = 1;
     }
 }
@@ -74,21 +84,26 @@ void unreference_all_pages() {
 void unmap_address(int8_t real_addr){
     int i;
     for(i = 0; i < N_SLOTS_VM; i++){
-        if(page_table[i].real_addr == real_addr){
-            page_table[i].is_mapped = false;
+        if(page_table[i].real_addr == real_addr && page_table[i].is_mapped == 1){
+            printf("Successfully unmapped virtual addr %d\n", i);
+            page_table[i].is_mapped = 0;
             break;
         }
     }
 }
 
 // returns the address on swap of an old real memory address
-int8_t get_swap_address(int8_t end_real){
+int8_t get_swap_address(int8_t v_addr, int8_t r_addr){
     int i;
+    printf("Searching on swap...\n");
     for (i = 0; i < N_SLOTS_SWAP; i++){
-        if(swap[i].old_addr == end_real && swap[i].page.is_free == 0){
+        if(swap[i].old_vm_addr == v_addr && swap[i].old_rm_addr == r_addr && swap[i].page.is_free == 0){
+            printf("FOUND IT!\n");
             return i;
+        }else{
         }
     }
+    printf("Didn't found it.\n");
     return -1;
 }
 
@@ -146,16 +161,16 @@ int reference_page(int8_t addr) {
 
         if(real_addr == -1){//real memory is full
 
-            int8_t swap_addr = get_swap_address(pte.real_addr);
+            int8_t swap_addr = get_swap_address(addr, pte.real_addr);
             page_t swap_page;
             bool from_swap = 0;
 
             if(swap_addr != -1){ // está na swap
-                printf("Given address wasn't on swap !\n");
+                printf("Given address was on swap !\n");
                 swap_page = remove_from_swap(swap_addr);
                 from_swap = 1;
             }else{
-                printf("Given address was on swap !\n");
+                printf("Given address wasn't on swap !\n");
                 // get a new swap address to recieve the oldest page
                 swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
             }
@@ -164,6 +179,9 @@ int reference_page(int8_t addr) {
             int8_t liberated_adrr; //liberated address
             swap[swap_addr].page = lru_page(&liberated_adrr);
             swap[swap_addr].page.is_free = 0;// sets the swap slot as busy
+            // store information for possible recovery
+            swap[swap_addr].old_rm_addr = liberated_adrr;
+            swap[swap_addr].old_vm_addr = addr;
 
             printf("Page mapped to %d\n", liberated_adrr);
             printf("obs:The removed page went to swap[%d]\n", swap_addr);

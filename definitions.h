@@ -3,9 +3,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define N_SLOTS_RM 3
-#define N_SLOTS_VM 6
-#define N_SLOTS_SWAP 3 // |SW| >= |VM| - |RM|
+#define N_SLOTS_RM 8
+#define N_SLOTS_VM 16
+#define N_SLOTS_SWAP 16 // |SW| >= |VM| - |RM|
 
 #define MAX_CONTENT_VAL 1000
 
@@ -23,7 +23,8 @@ typedef struct {
 
 typedef struct {
     page_t page;
-    int8_t old_addr;
+    int8_t old_rm_addr;
+    int8_t old_vm_addr;
 }sw_mem_slot_t;
 
 extern mem_slot_t real_memory[N_SLOTS_RM];
@@ -46,7 +47,7 @@ int reference_page(int8_t addr);
 page_t lru_page(int8_t *lib_addr);
 void init_pages_as_free();
 void unreference_all_pages();
-int8_t get_swap_address(int8_t end_real);
+int8_t get_swap_address(int8_t v_addr, int8_t r_addr);
 page_t remove_from_swap(int8_t swap_addr);
 void update_counters();
 
