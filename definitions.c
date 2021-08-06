@@ -126,7 +126,11 @@ void update_counters(){
             }else{
                 real_memory[i].page.referenced_counter = 0 ; // update counter;
             }
-            real_memory[i].page.referenced_counter += 128; // update counter;
+            // Updating the counter: setting the first bit, from left to right, to 1
+            // The first bit is actually the eight one in memory (in x86-64),
+            // so the argument to set_bit is 7 (index starts at 0).
+            set_bit(&real_memory[i].page.referenced_counter, 7, true);
+
         }else{
             if(real_memory[i].page.referenced_counter != 0){
                 real_memory[i].page.referenced_counter /=2 ; // update counter;
