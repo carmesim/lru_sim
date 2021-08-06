@@ -48,7 +48,7 @@ void init_pages_as_free() {
     }
 }
 
-// set referenced bit of all pages as 0 
+// set referenced bit of all pages as 0
 void unreference_all_pages() {
     for(int8_t i = 0; i < N_SLOTS_RM; i++) {
         real_memory[i].page.R = 0;
@@ -116,12 +116,78 @@ void update_counters(){
     printf("\n");
 }
 
+int deal_with_page_miss(int8_t addr, page_table_entry_t * pte) {
+    // page miss
+    RED()
+    printf(" missed!\n");
+    BLACK()
+
+    int8_t real_addr = get_free_real_address();// -1 se não achar
+
+    if(real_addr == -1){//real memory is full
+
+        int8_t swap_addr = get_swap_address(addr, pte->real_addr);
+        page_t swap_page;
+        bool from_swap = 0;
+
+        if(swap_addr != -1){ // está na swap
+            printf("Given address was on swap !\n");
+            swap_page = remove_from_swap(swap_addr);
+            from_swap = 1;
+        }else{
+            printf("Given address wasn't on swap !\n");
+            // get a new swap address to recieve the oldest page
+            swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
+        }
+
+        // find lru page and puts it into swap
+        int8_t liberated_adrr; //liberated address
+        swap[swap_addr].page = lru_page(&liberated_adrr);
+        swap[swap_addr].page.is_free = 0;// sets the swap slot as busy
+        // store information for possible recovery
+        swap[swap_addr].old_rm_addr = liberated_adrr;
+        swap[swap_addr].old_vm_addr = addr;
+
+        printf("LRU was on RM[%02d]\n", liberated_adrr);
+        printf("VM[%02d] mapped to RM[%02d]\n", addr, liberated_adrr);
+        printf("obs:The removed page went to SW[%d]\n", swap_addr);
+
+        // set the virtual address that was mapped on the lru as unmapped
+        unmap_address(liberated_adrr);
+
+        // the freed address will recieve the new page
+        real_memory[liberated_adrr].page.referenced_counter = 0 ; // update counter to 0;
+        real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
+
+        if(from_swap == 1){
+            real_memory[liberated_adrr].page.content = swap_page.content;
+        }else{
+            real_memory[liberated_adrr].page.content = rand()%MAX_CONTENT_VAL;
+        }
+
+        pte->real_addr = liberated_adrr; // store it in the page table
+        pte->is_mapped = 1;
+        page_table[addr] = *pte;
+    }else{
+        pte->real_addr = real_addr;
+        pte->is_mapped = 1;
+
+        real_memory[pte->real_addr].page.content = rand()%MAX_CONTENT_VAL;
+        real_memory[pte->real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
+        real_memory[pte->real_addr].page.is_free = false; // set the page as linked to a virtual address
+
+        page_table[addr] = *pte;//update page table entry
+        printf("Page mapped to %d\n", real_addr);
+    }
+    return 0;
+}
+
 int reference_page(int8_t addr) {
     if(addr >= N_SLOTS_VM) {
         // invalid virtual address
         return -1;
     }
-    
+
     // lookup page table entry of given address
     page_table_entry_t pte = page_table[addr];
 
@@ -135,75 +201,14 @@ int reference_page(int8_t addr) {
         printf(" ok!\n");
         BLACK()
 
-    }else{
-        // page miss
-        RED()
-        printf(" missed!\n");
-        BLACK()
-
-        int8_t real_addr = get_free_real_address();// -1 se não achar
-
-        if(real_addr == -1){//real memory is full
-
-            int8_t swap_addr = get_swap_address(addr, pte.real_addr);
-            page_t swap_page;
-            bool from_swap = 0;
-
-            if(swap_addr != -1){ // está na swap
-                printf("Given address was on swap !\n");
-                swap_page = remove_from_swap(swap_addr);
-                from_swap = 1;
-            }else{
-                printf("Given address wasn't on swap !\n");
-                // get a new swap address to recieve the oldest page
-                swap_addr = get_free_swap_address();// tem que estar entre N_SLOTS_RM
-            }
-
-            // find lru page and puts it into swap
-            int8_t liberated_adrr; //liberated address
-            swap[swap_addr].page = lru_page(&liberated_adrr);
-            swap[swap_addr].page.is_free = 0;// sets the swap slot as busy
-            // store information for possible recovery
-            swap[swap_addr].old_rm_addr = liberated_adrr;
-            swap[swap_addr].old_vm_addr = addr;
-
-            printf("LRU was on RM[%02d]\n", liberated_adrr);
-            printf("VM[%02d] mapped to RM[%02d]\n", addr, liberated_adrr);
-            printf("obs:The removed page went to SW[%d]\n", swap_addr);
-
-            // set the virtual address that was mapped on the lru as unmapped
-            unmap_address(liberated_adrr);
-
-            // the freed address will recieve the new page
-            real_memory[liberated_adrr].page.referenced_counter = 0 ; // update counter to 0;
-            real_memory[liberated_adrr].page.R = 1; // was recently referenced ! (in the last cycle)
-
-            if(from_swap == 1){
-                real_memory[liberated_adrr].page.content = swap_page.content;
-            }else{
-                real_memory[liberated_adrr].page.content = rand()%MAX_CONTENT_VAL;
-            }
-
-            pte.real_addr = liberated_adrr; // store it in the page table
-            pte.is_mapped = 1;  
-            page_table[addr] = pte;
-        }else{
-            pte.real_addr = real_addr;
-            pte.is_mapped = 1;
-
-            real_memory[pte.real_addr].page.content = rand()%MAX_CONTENT_VAL;
-            real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
-            real_memory[pte.real_addr].page.is_free = false; // set the page as linked to a virtual address
-
-            page_table[addr] = pte;//update page table entry
-            printf("Page mapped to %d\n", real_addr);
-        }
+    }else {
+        return deal_with_page_miss(addr, &pte);
     }
     return 0;
 }
 
 
-// returns the last recently used page 
+// returns the last recently used page
 // and changes lib_addr to the freed address
 // on the real memory
 page_t lru_page(int8_t *lib_addr){
