@@ -136,13 +136,13 @@ int main()
                     }
                 }else{
                     if(i < N_SLOTS_SWAP){
-                        printf("\t\t\t\t\t        | SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
+                        printf("%44s| SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", "", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
                     }else{
                         printf("\n");
                     }
                 }
             }else{
-                printf("\t\t\t\t\t\t\t\t        | SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
+                printf("%40s| SW[%02d] = (content=%03d, va=%02d, ra=%02d is_free=%d)\n", "", i, swap[i].page.content, swap[i].old_vm_addr,  swap[i].old_vm_addr,swap[i].page.is_free );
 
             }
         }
