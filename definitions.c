@@ -132,10 +132,16 @@ int reference_page(int8_t addr) {
         //printf("Page in real address %d was referenced\n", pte.real_addr);
 
         real_memory[pte.real_addr].page.R = 1; // was recently referenced ! (in the last cycle)
+        GREEN()
+        printf(" ok!\n");
+        BLACK()
 
     }else{
         // page miss
-        printf("Page Miss !\n");
+        RED()
+        printf(" missed!\n");
+        BLACK()
+
         int8_t real_addr = get_free_real_address();// -1 se não achar
 
         if(real_addr == -1){//real memory is full
@@ -202,7 +208,7 @@ int reference_page(int8_t addr) {
 // and changes lib_addr to the freed address
 // on the real memory
 page_t lru_page(int8_t *lib_addr){
-    int i, pi_counter = 0, n_zeros_page = 0, i_lru = 0, greatest;
+    int i, pi_counter = 0, n_zeros_page = 0, i_lru = 0, greatest = 0;
     page_t lru;
     for (i = 0; i < N_SLOTS_RM; i++){
         pi_counter = real_memory[i].page.referenced_counter;

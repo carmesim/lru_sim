@@ -135,7 +135,7 @@ int main(int argc, char** argv){
         for (i = 0; i < n_pages; i++){
             v_addr = rand()%N_SLOTS_VM;
             pages_index[pages_index_size++] = v_addr;
-            printf("\nReferencing page in virtual addr %d...\n", v_addr);
+            printf("\nReferencing page in virtual addr %d...", v_addr);
             int rv = reference_page(v_addr);
             if(rv == -1){
                 printf("Invalid virtual address\n");
