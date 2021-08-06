@@ -165,12 +165,12 @@ int reference_page(int8_t addr) {
             swap[swap_addr].page = lru_page(&liberated_adrr);
             swap[swap_addr].page.is_free = 0;// sets the swap slot as busy
             // store information for possible recovery
-            printf("actual va = %d, actual vr = %d\n", addr, liberated_adrr);
             swap[swap_addr].old_rm_addr = liberated_adrr;
             swap[swap_addr].old_vm_addr = addr;
 
-            printf("Page mapped to %d\n", liberated_adrr);
-            printf("obs:The removed page went to swap[%d]\n", swap_addr);
+            printf("LRU was on RM[%02d]\n", liberated_adrr);
+            printf("VM[%02d] mapped to RM[%02d]\n", addr, liberated_adrr);
+            printf("obs:The removed page went to SW[%d]\n", swap_addr);
 
             // set the virtual address that was mapped on the lru as unmapped
             unmap_address(liberated_adrr);
