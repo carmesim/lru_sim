@@ -110,7 +110,7 @@ int main(int argc, char** argv){
     sanity_check_count_zeroes();
     sanity_check_set_bit();
     printf("\nProgram\n");
-    srand(4);
+    srand(5);
     
     int i, max_n_pages = 3, cycle = 0;
 
@@ -182,7 +182,9 @@ int main(int argc, char** argv){
             }
         }
         
-        getchar();
+        //getchar(); // manual clock
+        sleep(1);
+
         cycle++;
         printf("\n\n");
     }
